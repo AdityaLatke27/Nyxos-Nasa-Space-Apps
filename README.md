@@ -2,7 +2,7 @@
 
 A lunar south-pole landing-site navigator built for the NASA Space Apps challenge on Sun and Earth positions at candidate landing sites. It answers three questions separately, for one lander and one landing time: **can we land here** (Safety), **can we complete the mission** (Operations), and **is it worth visiting** (Science). There is no combined score and no ranking. Every figure shows its source and the resolution of the data behind it.
 
-Live demo: _add the hosted link here_
+Live demo: nyxos-space.vercel.app/
 
 ## What it does
 
