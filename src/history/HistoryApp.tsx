@@ -1,8 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import NavRail from '../ui/nav/NavRail'
 import '../landing/ui/landing.css'
 import './history.css'
-import { COUNTRY_COLOR, FAST_FACTS, INFO, KIND_LABEL, MISSIONS, QUIZ, craterHref, eyesUrl, landingHref, placeOf, type Kind, type Mission, type Place } from './data'
+import { spacecraftOf } from './spacecraft'
+
+const MoonGlobe = lazy(() => import('./MoonGlobe'))
+const SpacecraftViewer = lazy(() => import('./SpacecraftViewer'))
+
+function webglAvailable() {
+  try {
+    const c = document.createElement('canvas')
+    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
+import { COUNTRY_COLOR, FAST_FACTS, INFO, KIND_LABEL, MISSIONS, QUIZ, craterHref, landingHref, placeOf, type Kind, type Mission, type Place } from './data'
 
 interface SiteRow { id: string; lat: number; lon: number }
 const YEARS = { min: 1959, max: 2026 }
@@ -18,8 +31,8 @@ export default function HistoryApp() {
   const [filter, setFilter] = useState<Filter>('all')
   const [sel, setSel] = useState<string>('apollo11')
   const [open, setOpen] = useState<string | null>(null)
-  const [eyesFor, setEyesFor] = useState<string | null>(null)
-  const [eyesLoaded, setEyesLoaded] = useState(false)
+  const [craftOpen, setCraftOpen] = useState<{ mission: string; craft: string } | null>(null)
+  const gl = useMemo(webglAvailable, [])
 
   useEffect(() => {
     fetch('/sim/sites.json').then((r) => r.json()).then((d: SiteRow[]) => setSites(d)).catch(() => setSites([]))
@@ -40,10 +53,7 @@ export default function HistoryApp() {
     setFilter('all')
     setTimeout(() => document.getElementById(`hs-m-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60)
   }
-  const launchEyes = (id: string) => {
-    setEyesLoaded(false)
-    setEyesFor(id)
-  }
+  const markers = useMemo(() => mapDots.map(({ m, p }) => ({ id: m.id, title: m.title, lat: p.lat, lon: p.lon, color: COUNTRY_COLOR[m.country] })), [mapDots])
 
   return (
     <div className="ld-root">
@@ -52,7 +62,7 @@ export default function HistoryApp() {
         <header className="ld-head">
           <div>
             <h1>Moon history</h1>
-            <p>How people and robots reached the Moon. Slide through the years, tap a dot on the Moon or a mission below, and open it to see the facts and fly to it in NASA's 3D viewer.</p>
+            <p>How people and robots reached the Moon. Slide through the years, tap a dot on the Moon or a mission below, and open it to see the facts and inspect its spacecraft in 3D.</p>
           </div>
         </header>
 
@@ -71,6 +81,11 @@ export default function HistoryApp() {
           </label>
 
           <div className="hs-mapwrap">
+            {gl ? (
+              <Suspense fallback={<div className="mg-wrap mg-loading" role="status">Loading the 3D Moon…</div>}>
+                <MoonGlobe markers={markers} selected={sel} onSelect={fromMap} lightIso={selected?.atIso ?? null} />
+              </Suspense>
+            ) : (
             <svg className="hs-map" viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="group" aria-label="Map of the whole Moon with landing spots">
               <defs>
                 <radialGradient id="hs-g" cx="50%" cy="50%" r="75%"><stop offset="0" stopColor="#2a3040" /><stop offset="1" stopColor="#12151f" /></radialGradient>
@@ -90,8 +105,9 @@ export default function HistoryApp() {
                 </g>
               ))}
             </svg>
+            )}
             <p className="ld-hint" aria-live="polite">
-              {selected ? `Selected: ${selected.title}. ` : ''}Left to right goes west to east around the Moon, and the bottom edge is the south pole. Dots appear only for landings whose position we have from a published source.
+              {selected ? `Selected: ${selected.title}. ` : ''}{gl ? '' : 'The 3D Moon needs WebGL, which this browser does not offer, so a flat map is shown. Left to right goes west to east around the Moon, and the bottom edge is the south pole. '}Dots appear only for landings whose position we have from a published source.
             </p>
           </div>
         </section>
@@ -136,19 +152,27 @@ export default function HistoryApp() {
                       <p className="hs-fact"><b>Did you know?</b> {m.fact}</p>
                       {p && <p className="hs-pos">Landing spot: {Math.abs(p.lat).toFixed(2)}°{p.lat < 0 ? 'S' : 'N'}, {Math.abs(p.lon).toFixed(2)}°{p.lon < 0 ? 'W' : 'E'}. Source: {p.note}.</p>}
                       <div className="ld-actions">
-                        {info && eyesFor !== m.id && <button className="hs-btn" onClick={() => launchEyes(m.id)}>Fly there in NASA Eyes</button>}
                         {p && <a className="hs-btn ghost" href={craterHref(m, p)}>See where it landed</a>}
                         {p && <a className="hs-btn ghost" href={landingHref(m, p)}>Is the Sun up there?</a>}
                       </div>
-                      {info && eyesFor === m.id && (
-                        <div className="hs-eyes">
-                          <div className="hs-frame">
-                            <iframe title={`NASA Eyes: ${m.title}`} src={eyesUrl(info.eyes)} allow="accelerometer; fullscreen" allowFullScreen onLoad={() => setEyesLoaded(true)} />
-                            {!eyesLoaded && <div className="hs-note">Loading NASA's 3D viewer…</div>}
-                          </div>
-                          <p className="ld-hint">NASA's Eyes on the Solar System, set to the Moon at this mission's moment. Drag to look around and scroll to zoom. Spacecraft models appear only where NASA's viewer has them. <a href={eyesUrl(info.eyes)} target="_blank" rel="noreferrer">Open it full screen</a>. <button className="hs-linkbtn" onClick={() => setEyesFor(null)}>Close the viewer</button></p>
-                        </div>
-                      )}
+                      <h4 className="hs-crafth">Spacecraft in this mission</h4>
+                      <ul className="hs-crafts">
+                        {spacecraftOf(m.id).map((c) => (
+                          <li key={c.id}>
+                            <button className={`hs-craft${craftOpen?.craft === c.id && craftOpen.mission === m.id ? ' on' : ''}`} aria-pressed={craftOpen?.craft === c.id && craftOpen.mission === m.id} onClick={() => setCraftOpen(craftOpen?.craft === c.id && craftOpen.mission === m.id ? null : { mission: m.id, craft: c.id })}>
+                              <b>{c.name}</b><span>{c.kind}{c.model ? ', 3D model' : ', no 3D model'}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      {craftOpen?.mission === m.id && (() => {
+                        const c = spacecraftOf(m.id).find((x) => x.id === craftOpen.craft)
+                        return c ? (
+                          <Suspense fallback={<div className="sv-none" role="status">Loading…</div>}>
+                            <SpacecraftViewer craft={c} missionId={m.id} onClose={() => setCraftOpen(null)} />
+                          </Suspense>
+                        ) : null
+                      })()}
                     </div>
                   </div>
                 </li>
@@ -159,7 +183,7 @@ export default function HistoryApp() {
 
         <Quiz />
 
-        <p className="ld-hint hs-foot">Dates are the public mission dates from the space agencies and companies involved. Landing positions are published ones; the sources are shown with each. The 3D viewer is NASA's Eyes on the Solar System. The Moon's south pole is covered in more detail on the Landing and Compare pages.</p>
+        <p className="ld-hint hs-foot">Dates are the public mission dates from the space agencies and companies involved. Landing positions are published ones; the sources are shown with each. Moon terrain is NASA LOLA elevation. Spacecraft models are from NASA 3D Resources where one exists for that exact craft. The Moon's south pole is covered in more detail on the Landing and Compare pages.</p>
       </main>
     </div>
   )

@@ -75,3 +75,34 @@
 .hs-card .ld-actions{margin-top:8px}
 @media (max-width:760px){.hs-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.hs-chev{transition:none}}
+/* 3D Moon and spacecraft inspection */
+.mg-wrap{position:relative;aspect-ratio:16/10;min-height:300px;max-height:640px;border-radius:14px;overflow:hidden;background:#000;border:1px solid var(--glass-border)}
+.mg-wrap.full{max-height:none;aspect-ratio:auto;border-radius:0}
+.mg-loading{display:grid;place-items:center;color:#93a3bd}
+.mg-bar{position:absolute;top:10px;right:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.mg-bar button{all:unset;cursor:pointer;padding:7px 12px;border-radius:999px;background:rgba(10,14,24,.78);border:1px solid rgba(255,255,255,.22);color:#e4ecf8;font-size:13.5px}
+.mg-bar button:hover{border-color:#6fc3ff}.mg-bar button:focus-visible{outline:2px solid #6fc3ff;outline-offset:2px}
+.mg-hint{position:absolute;left:10px;right:10px;bottom:8px;margin:0;font-size:12.5px;color:#a9b7cf;text-shadow:0 1px 3px #000;pointer-events:none}
+.mg-label{padding:3px 8px;border-radius:8px;background:rgba(10,14,24,.85);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:13px;white-space:nowrap}
+.hs-crafth{margin:16px 0 6px;font-size:15px;color:#cfe6ff}
+.hs-crafts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.hs-craft{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;width:100%;cursor:pointer;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04)}
+.hs-craft b{color:#fff;font-size:15px}.hs-craft span{font-size:12.5px;color:#93a3bd}
+.hs-craft:hover,.hs-craft.on{border-color:#6fc3ff;background:rgba(111,195,255,.1)}
+.hs-craft:focus-visible{outline:2px solid #6fc3ff;outline-offset:2px}
+.sv{margin-top:14px;padding:14px;border-radius:14px;border:1px solid rgba(111,195,255,.4);background:rgba(8,12,22,.6)}
+.sv-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.sv-top h3{margin:0;font-size:20px;color:#fff}.sv-sub{margin:2px 0 10px;color:#93a3bd;font-size:14px}
+.sv h4{margin:16px 0 6px;font-size:15px;color:#cfe6ff}
+.sv-stage{position:relative;aspect-ratio:16/10;min-height:280px;max-height:560px;border-radius:12px;overflow:hidden;background:#05070d;border:1px solid var(--glass-border);margin-bottom:12px}
+.sv-stage.full{max-height:none;aspect-ratio:auto;border-radius:0}
+.sv-none{padding:16px;border-radius:12px;border:1px dashed rgba(255,255,255,.25);color:#c3cfe3;line-height:1.5;margin-bottom:12px}
+.sv-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;margin:0}
+.sv-specs dt{font-size:12.5px;color:#93a3bd}.sv-specs dd{margin:0;color:#e4ecf8;font-size:15px;line-height:1.45}
+.sv-stages{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.sv-stages li{padding-left:12px;border-left:2px solid rgba(111,195,255,.4)}
+.sv-stages b{color:#fff;font-size:15px}.sv-stages p{margin:3px 0 0;color:#dbe5f5;line-height:1.55;font-size:15px}
+.sv-stages .sv-empty{color:#7f8da5;font-style:italic}
+.sv-src a{margin-left:4px;font-size:12px;color:#8fd0ff}
+.sv-credit{margin-top:14px}
+@media (max-width:760px){.sv-specs{grid-template-columns:1fr}}
