@@ -8,7 +8,6 @@ import { moonState } from '../astro/ephemeris'
 export interface GlobeMarker { id: string; title: string; lat: number; lon: number; color: string }
 
 const DEG = Math.PI / 180
-const R_KM = 1737.4
 /** the same convention as src/astro: x toward 90°E, y toward the north pole, z toward 0° longitude */
 export const toVec = (lat: number, lon: number, r = 1) => new THREE.Vector3(Math.cos(lat * DEG) * Math.sin(lon * DEG) * r, Math.sin(lat * DEG) * r, Math.cos(lat * DEG) * Math.cos(lon * DEG) * r)
 
@@ -36,84 +35,13 @@ function useTexture(url: string, srgb: boolean) {
   return tex
 }
 
-/**
- * Relief shading from NASA LOLA elevation (LDEM_16, the global height map already used by the Crater tab).
- * The height image keeps the high byte in R and the low byte in G. Output is a tangent-space normal map at half resolution.
- * Slopes are exaggerated so the relief reads at globe scale; the sphere itself is not displaced, so markers stay on the surface.
- */
-async function buildNormalMap(signal: { cancelled: boolean }): Promise<THREE.DataTexture | null> {
-  const manifest = await (await fetch('/moon/manifest.json')).json()
-  const { hMin, hMax } = manifest.global as { hMin: number; hMax: number }
-  const blob = await (await fetch('/moon/' + manifest.global.file)).blob()
-  const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' })
-  if (signal.cancelled) return null
-  const W = bmp.width, H = bmp.height
-  const cv = document.createElement('canvas')
-  cv.width = W
-  cv.height = H
-  const ctx = cv.getContext('2d', { willReadFrequently: true })!
-  ctx.drawImage(bmp, 0, 0)
-  bmp.close()
-  const px = ctx.getImageData(0, 0, W, H).data
-  const k = (hMax - hMin) / 65535
-  const h = (x: number, y: number) => {
-    const i = (Math.min(H - 1, Math.max(0, y)) * W + ((x + W) % W)) * 4
-    return hMin + ((px[i] << 8) | px[i + 1]) * k
-  }
-  const ow = W >> 1, oh = H >> 1
-  const out = new Uint8Array(ow * oh * 4)
-  const EX = 6
-  const dyKm = (Math.PI * R_KM) / H * 2
-  for (let y = 0; y < oh; y++) {
-    const sy = y * 2
-    const lat = (0.5 - (y + 0.5) / oh) * Math.PI
-    const dxKm = Math.max(0.15 * dyKm, ((2 * Math.PI * R_KM) / W) * 2 * Math.cos(lat))
-    const row = oh - 1 - y // DataTexture row 0 is the south pole
-    for (let x = 0; x < ow; x++) {
-      const sx = x * 2
-      const dhE = (h(sx + 2, sy) - h(sx - 2, sy)) / (2 * dxKm)
-      const dhN = (h(sx, sy - 2) - h(sx, sy + 2)) / (2 * dyKm)
-      const nx = -dhE * EX, ny = -dhN * EX
-      const inv = 1 / Math.hypot(nx, ny, 1)
-      const o = (row * ow + x) * 4
-      out[o] = (nx * inv * 0.5 + 0.5) * 255
-      out[o + 1] = (ny * inv * 0.5 + 0.5) * 255
-      out[o + 2] = (inv * 0.5 + 0.5) * 255
-      out[o + 3] = 255
-      if (signal.cancelled) return null
-    }
-    if (y % 128 === 127) await new Promise((r) => setTimeout(r, 0))
-  }
-  const t = new THREE.DataTexture(out, ow, oh, THREE.RGBAFormat)
-  t.wrapS = THREE.RepeatWrapping
-  t.minFilter = THREE.LinearMipmapLinearFilter
-  t.magFilter = THREE.LinearFilter
-  t.generateMipmaps = true
-  t.anisotropy = 4
-  t.needsUpdate = true
-  return t
-}
-
 function Moon({ sun, onReliefState }: { sun: THREE.Vector3; onReliefState: (s: 'loading' | 'ready' | 'failed') => void }) {
   const color = useTexture('/moon/color_4k.webp', true)
-  const [normal, setNormal] = useState<THREE.DataTexture | null>(null)
+  // Precomputed offline from NASA LOLA elevation (tools/make-history-normal.py), so nothing is decoded or computed at load.
+  const normal = useTexture('/history/moon_normal_2k.webp', false)
   useEffect(() => {
-    const sig = { cancelled: false }
-    let made: THREE.DataTexture | null = null
-    onReliefState('loading')
-    buildNormalMap(sig)
-      .then((t) => {
-        if (!t) return
-        made = t
-        setNormal(t)
-        onReliefState('ready')
-      })
-      .catch(() => onReliefState('failed'))
-    return () => {
-      sig.cancelled = true
-      made?.dispose()
-    }
-  }, [onReliefState])
+    onReliefState(normal ? 'ready' : 'loading')
+  }, [normal, onReliefState])
   return (
     <>
       <mesh rotation={[0, Math.PI / 2, 0]}>
