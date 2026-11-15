@@ -28,6 +28,7 @@ import PolarPicker from './PolarPicker'
 import Landing3D, { webglAvailable } from './Landing3D'
 import { DARK, HazardMap, HorizonChart, SensitivityChart, ShadowMap, SlopeHistogram, TimelineChart, WindowCalendar } from './Charts'
 import StatusLegend from './StatusLegend'
+import Glossary from './Glossary'
 import { STATUS_GLYPH, STATUS_LABEL, STATUS_MEANING, fmtDur, fmtLat, fmtLon, fmtUtc, windowLines } from './format'
 import './landing.css'
 
@@ -385,6 +386,7 @@ export default function LandingApp() {
             </section>
 
             <section className="ld-sec">
+              <Glossary />
               <h2>Data and method</h2>
               <p className="ld-sub">Open the downloadable report for the full methods, validation and reference list.</p>
               <table className="ld-t"><tbody>

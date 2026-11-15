@@ -19,9 +19,10 @@ import { DEFAULT_POWER, type PowerInputs } from '../power'
 import { ROBUSTNESS_LABEL } from '../sensitivity'
 import { yieldToBrowser } from '../nearby'
 import { MISSION_SITES, WUELLER_SITES } from '../candidateSites'
-import { accessRows, decidingText, nextChangeText, compareCsv, rowDiffers, rowFor, rowList, slipTimes, verdictSummary, type CompareResult, type SiteEntry } from '../compare'
+import { accessRows, decidingText, nextChangeText, compareCsv, rowDiffers, rowFor, rowList, slipTimes, plainSummary, verdictSummary, type CompareResult, type SiteEntry } from '../compare'
 import { downloadText } from '../report'
 import StatusLegend from './StatusLegend'
+import Glossary from './Glossary'
 import { STATUS_GLYPH, STATUS_LABEL, STATUS_MEANING, fmtLat, fmtLon, fmtUtc } from './format'
 import './landing.css'
 
@@ -242,6 +243,7 @@ export default function CompareApp() {
         {results.length > 0 && (
           <section className="ld-sec" aria-label="Comparison">
             <div className="cmp-summary" aria-live="polite">
+              {plainSummary(results).map((l) => <p key={l} className="cmp-plain"><b>{l}</b></p>)}
               {verdictSummary(results).map((l) => <p key={l}>{l}</p>)}
             </div>
             {decidingText(results) && <p className="cmp-decides">{decidingText(results)}</p>}
@@ -293,6 +295,7 @@ export default function CompareApp() {
                 </tbody>
               </table>
             </div>
+            <Glossary />
             <p className="cmp-note">Amber bar: the sites differ on this row. A stable answer can still be a Fail. Rows marked not gating never change a verdict. Each site was analysed with its own data resolution, so compare a terrain resolution of 100 m against 500 m with care. Cold-trap and temperature rows are evidence for volatile stability, not proof of ice. Open the Landing page for any one site to see the sources, limits and figures behind each row.</p>
           </section>
         )}

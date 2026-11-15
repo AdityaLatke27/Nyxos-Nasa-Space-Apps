@@ -71,7 +71,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .l3-stage canvas{display:block}
 .l3-overlay{position:absolute;inset:0;pointer-events:none;z-index:2}
 .l3-tip{position:absolute;z-index:4;padding:.38rem .6rem;border-radius:8px;background:var(--glass-bg-strong);border:1px solid var(--glass-border);font-size:.72rem;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
-.l3-help{position:absolute;left:10px;bottom:8px;margin:0;z-index:3;font-size:11.5px;color:rgba(228,236,248,.75);text-shadow:0 1px 3px #000;pointer-events:none}
+.l3-help{position:absolute;left:10px;bottom:8px;margin:0;z-index:3;font-size:12.5px;color:rgba(228,236,248,.75);text-shadow:0 1px 3px #000;pointer-events:none}
 
 /* ---- site comparison ---- */
 .cmp-pick{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1fr);gap:26px;padding:18px;border-radius:18px;background:var(--glass-bg-strong);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow)}
@@ -91,7 +91,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .cmp-table thead th{position:sticky;top:0;background:#0b1220;font-size:14px}
 .cmp-table thead th small{display:block;font-weight:400;color:#93a3bd;font-size:12px;margin-top:2px}
 .cmp-table tbody th{font-weight:500;color:#cdd9ea;min-width:170px}
-.cmp-table tbody th i{display:block;font-style:normal;font-size:11.5px;color:#93a3bd}
+.cmp-table tbody th i{display:block;font-style:normal;font-size:12.5px;color:#93a3bd}
 .cmp-table tr.sect th{background:rgba(255,255,255,.04);font-size:12.5px;color:#93a3bd;font-weight:600}
 .cmp-table tr.diff th{box-shadow:inset 3px 0 0 #ffb86b}
 .cmp-cell .val{display:block;margin-top:4px;color:#cdd9ea;line-height:1.4}
@@ -134,3 +134,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .ld-legend dl div{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:start}
 .ld-legend dt{margin:0}.ld-legend dd{margin:0;line-height:1.45;color:#dbe5f5}
 @media (max-width:560px){.ld-legend dl div{grid-template-columns:1fr;gap:2px}}
+.cmp-plain{margin:4px 0;font-size:15.5px}
+.ld-gloss{margin-top:16px}
+.ld-gloss dl div{grid-template-columns:170px 1fr}
+@media (max-width:560px){.ld-gloss dl div{grid-template-columns:1fr}}

@@ -239,7 +239,7 @@ describe('exact sunrise and sunset times', () => {
   })
 })
 
-import { accessRows, accessSummary, compareCsv, decidingText, litDefinitionsText, nextChange, nextChangeText, rowDiffers, rowList, slipTimes, verdictSummary, type CompareResult } from './compare'
+import { accessRows, accessSummary, compareCsv, decidingText, litDefinitionsText, nextChange, nextChangeText, rowDiffers, rowList, slipTimes, plainSummary, verdictSummary, type CompareResult } from './compare'
 describe('site comparison helpers', () => {
   const mk = (name: string, st: 'PASS' | 'FAIL'): CompareResult => ({
     entry: { id: name, name, lat: -89, lon: 0 },
@@ -262,6 +262,12 @@ describe('site comparison helpers', () => {
     expect(s).toHaveLength(3)
     expect(s[0]).toBe('Safety — pass: A; fail: B')
     expect(s.join(' ')).not.toMatch(/score|rank/i)
+  })
+  it('gives a plain-English line per question, with counts only', () => {
+    const p = plainSummary(rs)
+    expect(p).toHaveLength(3)
+    expect(p[0]).toBe('Can we land? Out of 2: 1 pass, 1 fail.')
+    expect(p.join(' ')).not.toMatch(/score|rank/i)
   })
   it('exports csv with one column per site', () => {
     const c = compareCsv(rs, { profile: 'p', startIso: 't', stayDays: 6.5 })

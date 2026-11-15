@@ -161,6 +161,20 @@ export function verdictSummary(results: CompareResult[]): string[] {
   }
   return out
 }
+const QUESTION: Record<VerdictKey, string> = { safety: 'Can we land?', operations: 'Can we complete the mission?', science: 'Is it worth visiting?' }
+/** Plain-English bottom line, one sentence per question. Counts only; no combined score. */
+export function plainSummary(results: CompareResult[]): string[] {
+  const ok = results.filter((r) => r.a)
+  if (!ok.length) return []
+  const WORD: Record<Status, string> = { PASS: 'pass', WARNING: 'warning', FAIL: 'fail', NOT_EVALUATED: 'not evaluated', INFO: 'info' }
+  const order: Status[] = ['PASS', 'WARNING', 'FAIL', 'NOT_EVALUATED', 'INFO']
+  return (['safety', 'operations', 'science'] as VerdictKey[]).map((k) => {
+    const n = new Map<Status, number>()
+    for (const r of ok) n.set(r.a![k].status, (n.get(r.a![k].status) ?? 0) + 1)
+    const parts = order.filter((s) => n.has(s)).map((s) => `${n.get(s)} ${WORD[s]}${n.get(s)! > 1 && s !== 'NOT_EVALUATED' && s !== 'INFO' ? 's' : ''}`)
+    return `${QUESTION[k]} Out of ${ok.length}: ${parts.join(', ')}.`
+  })
+}
 const STATUS_WORD: Record<Status, string> = { PASS: 'pass', WARNING: 'warning', FAIL: 'fail', NOT_EVALUATED: 'not evaluated', INFO: 'info' }
 
 const q = (s: string) => `"${s.replace(/"/g, '""')}"`

@@ -106,3 +106,6 @@
 .sv-src a{margin-left:4px;font-size:12px;color:#8fd0ff}
 .sv-credit{margin-top:14px}
 @media (max-width:760px){.sv-specs{grid-template-columns:1fr}}
+.mg-wrap,.sv-stage{width:100%;box-sizing:border-box}
+@media (max-width:760px){.mg-wrap,.sv-stage{aspect-ratio:auto;height:min(420px,70vh);min-height:0}.mg-bar{left:10px;justify-content:flex-start}.mg-hint{font-size:12px}}
+.mg-wrap.full,.sv-stage.full{height:auto}
