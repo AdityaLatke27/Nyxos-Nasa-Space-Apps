@@ -21,7 +21,8 @@ import { yieldToBrowser } from '../nearby'
 import { MISSION_SITES, WUELLER_SITES } from '../candidateSites'
 import { accessRows, decidingText, nextChangeText, compareCsv, rowDiffers, rowFor, rowList, slipTimes, verdictSummary, type CompareResult, type SiteEntry } from '../compare'
 import { downloadText } from '../report'
-import { STATUS_GLYPH, STATUS_LABEL, fmtLat, fmtLon, fmtUtc } from './format'
+import StatusLegend from './StatusLegend'
+import { STATUS_GLYPH, STATUS_LABEL, STATUS_MEANING, fmtLat, fmtLon, fmtUtc } from './format'
 import './landing.css'
 
 const MAX_SITES = 6
@@ -34,7 +35,7 @@ const toInput = (ms: number) => new Date(ms).toISOString().slice(0, 16)
 
 function Chip({ s }: { s: Status }) {
   return (
-    <span className={`ld-chip st-${s}`}>
+    <span className={`ld-chip st-${s}`} title={STATUS_MEANING[s]}>
       <b aria-hidden>{STATUS_GLYPH[s]}</b>
       {STATUS_LABEL[s]}
     </span>
@@ -244,6 +245,7 @@ export default function CompareApp() {
               {verdictSummary(results).map((l) => <p key={l}>{l}</p>)}
             </div>
             {decidingText(results) && <p className="cmp-decides">{decidingText(results)}</p>}
+            <StatusLegend />
             <div className="cmp-scroll">
               <table className="cmp-table">
                 <thead>

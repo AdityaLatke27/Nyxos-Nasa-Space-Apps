@@ -28,6 +28,7 @@ async function waitServer() {
     await page.waitForSelector('.ld-access', { timeout: 300000 })
     const text = await page.evaluate(() => document.body.innerText)
     check('landing: verdict headline', /Not suitable|feasible|Conditionally|cannot be assessed/i.test(text))
+    check('landing: status legend explains Warning', await page.evaluate(() => /Warning is not a failure/.test(document.querySelector('.ld-legend')?.textContent ?? '')))
     check('landing: access strip', /Longest without sunlight/.test(text) && /Neither Sun nor Earth/.test(text))
     check('landing: time to next sunset/Earthset', /From landing:/.test(text))
     check('landing: power row', /Solar power and battery/.test(text))

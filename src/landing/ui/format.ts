@@ -7,6 +7,14 @@ export const STATUS_LABEL: Record<Status, string> = {
   NOT_EVALUATED: 'Not evaluated',
   INFO: 'Info',
 }
+/** One-line plain-language meaning of each status (also used as the chip tooltip). */
+export const STATUS_MEANING: Record<Status, string> = {
+  PASS: 'Meets the limit, with margin, and the data is good enough to say so.',
+  WARNING: 'Not a failure. It may work, but only just, only part of the time, or the data is too coarse to be sure. Read the reason next to it.',
+  FAIL: 'Does not meet the limit.',
+  NOT_EVALUATED: 'There is no data for this, so NYXOS gives no verdict. It does not mean good or bad.',
+  INFO: 'Context to help you decide. It is not graded.',
+}
 /** Shape glyph so status never depends on colour alone. */
 export const STATUS_GLYPH: Record<Status, string> = { PASS: '✓', WARNING: '▲', FAIL: '✕', NOT_EVALUATED: '–', INFO: 'i' }
 

@@ -27,7 +27,8 @@ import { DEFAULT_POWER, type PowerInputs } from '../power'
 import PolarPicker from './PolarPicker'
 import Landing3D, { webglAvailable } from './Landing3D'
 import { DARK, HazardMap, HorizonChart, SensitivityChart, ShadowMap, SlopeHistogram, TimelineChart, WindowCalendar } from './Charts'
-import { STATUS_GLYPH, STATUS_LABEL, fmtDur, fmtLat, fmtLon, fmtUtc, windowLines } from './format'
+import StatusLegend from './StatusLegend'
+import { STATUS_GLYPH, STATUS_LABEL, STATUS_MEANING, fmtDur, fmtLat, fmtLon, fmtUtc, windowLines } from './format'
 import './landing.css'
 
 const nextMidnight = () => {
@@ -38,7 +39,7 @@ const toInput = (ms: number) => new Date(ms).toISOString().slice(0, 16)
 
 function Chip({ s }: { s: keyof typeof STATUS_LABEL }) {
   return (
-    <span className={`ld-chip st-${s}`}>
+    <span className={`ld-chip st-${s}`} title={STATUS_MEANING[s]}>
       <b aria-hidden>{STATUS_GLYPH[s]}</b>
       {STATUS_LABEL[s]}
     </span>
@@ -300,6 +301,7 @@ export default function LandingApp() {
               </div>
               <p className={`ld-headline lv-${a.headline.level}`}>{a.headline.text}</p>
               <AccessStrip a={a} />
+              <StatusLegend />
               <div className="ld-cards">
                 <article className="ld-card">
                   <h3>Safety <Chip s={a.safety.status} /></h3>
