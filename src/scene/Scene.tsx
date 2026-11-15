@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
+import { PerformanceMonitor } from '@react-three/drei'
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { BlendFunction, ToneMappingMode } from 'postprocessing'
 import type { MoonAssets } from '../moon/loadMoonAssets'
@@ -75,6 +76,7 @@ interface SceneProps {
 }
 
 export default function Scene({ assets, lighting, logo, onBakeProgress, onReady }: SceneProps) {
+  const [ready, setReady] = useState(false)
   const coverage = useMemo<Coverage | null>(
     () =>
       assets && {
@@ -87,16 +89,31 @@ export default function Scene({ assets, lighting, logo, onBakeProgress, onReady 
     [assets],
   )
 
+  // Safety net only: if the frame rate stays low for a sustained period AFTER the intro is ready, drop the pixel ratio cap
+  // once (1.75 -> 1). Machines that hold their frame rate never see any change.
+  const [dprCap, setDprCap] = useState(1.75)
+  const [settled, setSettled] = useState(false)
+  useEffect(() => {
+    if (!ready) return
+    const t = setTimeout(() => setSettled(true), 5000)
+    return () => clearTimeout(t)
+  }, [ready])
+  const markReady = () => {
+    setReady(true)
+    onReady()
+  }
+
   return (
     <Canvas
       flat
-      dpr={[1, 1.75]}
+      dpr={[1, dprCap]}
       gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }}
       camera={{ fov: FOV_DEG, near: 0.001, far: 2400, position: [0, 0, 1 + intro.altitude] }}
     >
       <color attach="background" args={['#000000']} />
       <CameraRig logo={logo} coverage={coverage} />
-      {assets && <World assets={assets} lighting={lighting} onBakeProgress={onBakeProgress} onReady={onReady} />}
+      {assets && <World assets={assets} lighting={lighting} onBakeProgress={onBakeProgress} onReady={markReady} />}
+      {settled && dprCap > 1 && <PerformanceMonitor ms={400} iterations={8} onDecline={() => setDprCap(1)} />}
       <EffectComposer multisampling={4}>
         <Bloom mipmapBlur luminanceThreshold={0.82} luminanceSmoothing={0.25} intensity={0.5} radius={0.72} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
