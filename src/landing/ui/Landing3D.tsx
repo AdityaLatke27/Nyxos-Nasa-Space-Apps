@@ -37,12 +37,15 @@ export default function Landing3D({
   site,
   timeMs,
   onPick,
+  paused = false,
 }: {
   assets: SimAssets
   terrain: CpuTerrain
   site: { name: string; lat: number; lon: number }
   timeMs: number
   onPick: (lat: number, lon: number) => void
+  /** true while a verdict is being recalculated, so drawing does not compete with it */
+  paused?: boolean
 }) {
   const overlay = useRef<HTMLCanvasElement>(null)
   const [hover, setHover] = useState<HoverInfo | null>(null)
@@ -73,7 +76,7 @@ export default function Landing3D({
 
   return (
     <div className="l3-stage">
-      <Canvas flat dpr={[1, 1.25]} gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }} camera={{ fov: 40, near: 0.001, far: 6000, position: [0, -2.6, 2.2] }}>
+      <Canvas flat frameloop={paused ? 'never' : 'always'} dpr={1} gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }} camera={{ fov: 40, near: 0.001, far: 6000, position: [0, -2.6, 2.2] }}>
         <color attach="background" args={['#000000']} />
         <ClockDriver />
         <OverlaySizer overlay={overlay} />

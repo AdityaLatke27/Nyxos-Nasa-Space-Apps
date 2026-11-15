@@ -239,7 +239,7 @@ export default function LandingApp() {
               <button className={!mode3d ? 'on' : ''} onClick={() => setMode3d(false)}>2D map</button>
             </div>
             {mode3d && terrain ? (
-              <Landing3D assets={assets} terrain={terrain} site={site} timeMs={start} onPick={pick} />
+              <Landing3D assets={assets} terrain={terrain} site={site} timeMs={start} onPick={pick} paused={busy && !!a} />
             ) : (
               <PolarPicker sites={candidates} lat={site.lat} lon={site.lon} onPick={pick} imgSrc="/sim/lro_pole.webp" />
             )}
