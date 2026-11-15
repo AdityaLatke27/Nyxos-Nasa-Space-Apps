@@ -76,7 +76,7 @@ export default function Landing3D({
 
   return (
     <div className="l3-stage">
-      <Canvas flat frameloop={paused ? 'never' : 'always'} dpr={1} gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }} camera={{ fov: 40, near: 0.001, far: 6000, position: [0, -2.6, 2.2] }}>
+      <Canvas flat frameloop={paused ? 'never' : 'always'} dpr={0.85} gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }} camera={{ fov: 40, near: 0.001, far: 6000, position: [0, -2.6, 2.2] }}>
         <color attach="background" args={['#000000']} />
         <ClockDriver />
         <OverlaySizer overlay={overlay} />
